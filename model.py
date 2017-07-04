@@ -141,7 +141,7 @@ class AutoGAN:
 		if reuse :
 			tf.get_variable_scope().reuse_variables()
 
-		h0 = ops.lrelu(ops.conv2d(image, self.options['ef_dim'],
+		h0 = ops.lrelu(ops.conv2d(image, self.options['ef_dim'] * 8,
 								  name = 'd_h0_conv'))  # 64
 
 		h1 = ops.lrelu(slim.batch_norm(ops.conv2d(h0,
@@ -152,13 +152,13 @@ class AutoGAN:
 		                               scope = 'e_bn1'))  # 32
 
 		h2 = ops.lrelu(slim.batch_norm(ops.conv2d(h1,
-		                                     self.options['ef_dim'] * 6,
+		                                     self.options['ef_dim'] * 4,
 		                                     name = 'e_h2_conv'),
 		                               reuse=reuse,
 		                               is_training = t_training,
 		                               scope = 'e_bn2'))  # 16
 		h3 = ops.lrelu(slim.batch_norm(ops.conv2d(h2,
-		                                     self.options['ef_dim'] * 4,
+		                                     self.options['ef_dim'] * 2,
 		                                     name = 'e_h3_conv'),
 		                               reuse=reuse,
 		                               is_training = t_training,
