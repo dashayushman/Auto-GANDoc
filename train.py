@@ -3,14 +3,13 @@ import argparse
 import scipy.misc
 import os
 import shutil
-import skimage
 import progressbar
-import math
 
 import tensorflow as tf
 import numpy as np
 
 from os.path import join
+from skimage.transform import resize
 from tensorflow.examples.tutorials.mnist import input_data
 
 def main():
@@ -197,7 +196,7 @@ def process_mnist_images(batch, output_shape=(128, 128)):
 		rgb_img[:, :, 0] = img_gray
 		rgb_img[:, :, 1] = img_gray
 		rgb_img[:, :, 2] = img_gray
-		rgb_img = skimage.transform.resize(rgb_img, output_shape)
+		rgb_img = resize(rgb_img, output_shape)
 		output_images.append(rgb_img)
 	return [output_images, batch[1]]
 
