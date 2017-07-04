@@ -142,7 +142,7 @@ class AutoGAN:
 			tf.get_variable_scope().reuse_variables()
 
 		h0 = ops.lrelu(ops.conv2d(image, self.options['ef_dim'] * 8,
-								  name = 'd_h0_conv'))  # 64
+								  name = 'e_h0_conv'))  # 64
 
 		h1 = ops.lrelu(slim.batch_norm(ops.conv2d(h0,
 		                                     self.options['ef_dim'] * 8,
@@ -170,7 +170,7 @@ class AutoGAN:
 												name = 'e_h3_conv_new'),
 		                                reuse=reuse,
 		                                is_training = t_training,
-		                                scope = 'e_bn4'))  # 4
+		                                scope = 'e_bn4'))  # 8
 
 		h4_shape = h4.get_shape().as_list()
 		#h4_flat = tf.contrib.layers.flatten(h4)
