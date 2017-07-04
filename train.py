@@ -124,7 +124,7 @@ def main():
                         loss['autogan_loss'], outputs['decoder'], merged],
                         feed_dict={
 							input_tensors['input_images'].name : batch[0],
-							input_tensors['t_training'].name : args.train
+							input_tensors['training'].name : args.train
 						})
 			training_batch_losses.append(ag_loss)
 			print("\nAG Loss: {}\n".format(ag_loss))
@@ -168,7 +168,7 @@ def main():
 					[loss['autogan_loss'], outputs['decoder']],
 					    feed_dict={
 						   input_tensors['input_images'].name: batch[0],
-						   input_tensors['t_training'].name: args.train
+						   input_tensors['training'].name: args.train
 					    })
 				val_batch_losses.append(ag_loss)
 				batch_count += 1
