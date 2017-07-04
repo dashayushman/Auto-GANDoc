@@ -4,6 +4,7 @@ import scipy.misc
 import os
 import shutil
 import progressbar
+import pickle
 
 import tensorflow as tf
 import numpy as np
@@ -103,6 +104,7 @@ def main():
 
 	global_step = global_step_tensor.eval()
 	gs_assign_op = global_step_tensor.assign(global_step)
+	history_path = os.path.join(model_dir, 'history.pkl')
 	history = {'training_losses': [], 'validation_losses': [],
 			   'best_loss':float("inf"), 'best_epoch': 0,
 			   'validate_every': args.validate_every}
@@ -185,6 +187,8 @@ def main():
 			print('\n\nTraining Loss: {}\nValidation Loss: {}\n'
 				  'Best Loss: {}\nBest Epoch: {}\n\n'.format(mean_training_loss,
 				  mean_val_loss, history['best_loss'], history['best_epoch']))
+			pickle.dump(history, open(history_path, "wb"))
+
 
 
 def process_mnist_images(batch, output_shape=(128, 128)):
@@ -240,8 +244,8 @@ def initialize_directories(args):
 def save_for_vis(data_dir, real_images, generated_images) :
 	shutil.rmtree(data_dir)
 	os.makedirs(data_dir)
-	for i in range(0, real_images.shape[0]):
-		real_images_255 = (real_images[i, :, :, :])
+	for i in range(0, len(real_images)):
+		real_images_255 = real_images[i]
 		scipy.misc.imsave(join(data_dir, 'real_image_{}.jpg'.format(i)),
 						  real_images_255)
 		fake_images_255 = (generated_images[i, :, :, :])
