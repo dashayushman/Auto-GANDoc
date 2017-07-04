@@ -26,10 +26,6 @@ class AutoGAN:
 		                              img_size, img_size, 3],
 		                              name = 'input_image')
 
-		classes = tf.placeholder('float32', [self.options['batch_size'],
-										self.options['n_classes']],
-		                                name='real_classes')
-
 		training = tf.placeholder(tf.bool, name='training')
 
 		print('Building the Encoder')
@@ -61,7 +57,6 @@ class AutoGAN:
 		input_tensors = {
 			'input_images' : image,
 			'training' : training,
-
 		}
 
 		variables = {
