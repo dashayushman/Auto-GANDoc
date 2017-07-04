@@ -41,8 +41,8 @@ class AutoGAN:
 		print('Building the Loss Function')
 		auto_gan_loss = tf.contrib.losses.mean_squared_error(flat_gen_image,
 															labels=flat_image)
-
-		self.add_tb_histogram_summaries()
+		t_vars = tf.trainable_variables()
+		self.add_tb_histogram_summaries(t_vars)
 		self.add_tb_scalar_summaries(auto_gan_loss)
 
 		self.add_image_summary('Encoded Images', image,
@@ -50,7 +50,7 @@ class AutoGAN:
 		self.add_image_summary('Decoded Images', gen_image,
 							   self.options['batch_size'])
 
-		t_vars = tf.trainable_variables()
+
 		ag_vars = [var for var in t_vars if 'e_' in var.name or 'd_' in
 				   var.name]
 
