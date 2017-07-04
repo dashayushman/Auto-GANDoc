@@ -166,8 +166,7 @@ class AutoGAN:
 
 		h4 = ops.lrelu(slim.batch_norm(ops.conv2d(h3,
 												self.options['ef_dim'] * 2,
-													  1, 1, 1, 1,
-												name = 'e_h3_conv_new'),
+												name = 'e_h4_conv'),
 		                                reuse=reuse,
 		                                is_training = t_training,
 		                                scope = 'e_bn4'))  # 8
