@@ -105,7 +105,11 @@ def main():
 	global_step = global_step_tensor.eval()
 	gs_assign_op = global_step_tensor.assign(global_step)
 	history_path = os.path.join(model_dir, 'history.pkl')
-	history = {'training_losses': [], 'validation_losses': [],
+	history = None
+	if os.path.exists(history_path):
+		history = pickle.load( open( history_path, "rb" ) )
+	else:
+		history = {'training_losses': [], 'validation_losses': [],
 			   'best_loss':float("inf"), 'best_epoch': 0,
 			   'validate_every': args.validate_every}
 	if global_step >= args.epochs:
@@ -180,7 +184,7 @@ def main():
 				val_batch_losses.append(ag_loss)
 				bar.update(batch_count)
 				batch_count += 1
-				if (batch_count % args.save_every) == 0 and batch_count != 0:
+				if (batch_count % 50) == 0 and batch_count != 0:
 					save_for_vis(model_val_samples_dir, batch[0],
 								 decoded_images)
 			mean_val_loss = np.mean(val_batch_losses)
