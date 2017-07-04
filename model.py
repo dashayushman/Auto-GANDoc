@@ -152,13 +152,13 @@ class AutoGAN:
 		                               scope = 'e_bn1'))  # 32
 
 		h2 = ops.lrelu(slim.batch_norm(ops.conv2d(h1,
-		                                     self.options['ef_dim'] * 4,
+		                                     self.options['ef_dim'] * 6,
 		                                     name = 'e_h2_conv'),
 		                               reuse=reuse,
 		                               is_training = t_training,
 		                               scope = 'e_bn2'))  # 16
 		h3 = ops.lrelu(slim.batch_norm(ops.conv2d(h2,
-		                                     self.options['ef_dim'] * 2,
+		                                     self.options['ef_dim'] * 4,
 		                                     name = 'e_h3_conv'),
 		                               reuse=reuse,
 		                               is_training = t_training,
