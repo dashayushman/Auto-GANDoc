@@ -2,8 +2,7 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from Utils import ops
 
-
-class AutoGAN :
+class AutoGAN:
 	'''
 	OPTIONS
 	z_dim : Noise dimension 100

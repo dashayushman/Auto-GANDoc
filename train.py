@@ -76,7 +76,7 @@ def main():
 	}
 
 	# Initialize and build the GAN model
-	auto_gan = model.AutoGan(model_options)
+	auto_gan = model.AutoGAN(model_options)
 	input_tensors, variables, loss, outputs, checks = auto_gan.build_model()
 
 	ag_optim = tf.train.AdamOptimizer(args.learning_rate,
