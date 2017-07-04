@@ -72,7 +72,7 @@ class AutoGAN:
 		}
 
 		checks = {
-			'auto_gan_loss': auto_gan_loss,
+			'autogan_loss': auto_gan_loss,
 			'decoder': gen_image
 		}
 

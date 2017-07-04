@@ -121,7 +121,7 @@ def main():
 
 			# Encoder Update
 			_, ag_loss, decoded_images, summary = sess.run([ag_optim,
-                        loss['auto_gan_loss'], outputs['decoder'], merged],
+                        loss['autogan_loss'], outputs['decoder'], merged],
                         feed_dict={
 							input_tensors['input_images'].name : batch[0],
 							input_tensors['t_training'].name : args.train
@@ -165,7 +165,7 @@ def main():
 				os.makedirs(model_val_samples_dir)
 
 				ag_loss, decoded_images = sess.run(
-					[loss['auto_gan_loss'], outputs['decoder']],
+					[loss['autogan_loss'], outputs['decoder']],
 					    feed_dict={
 						   input_tensors['input_images'].name: batch[0],
 						   input_tensors['t_training'].name: args.train
