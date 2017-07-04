@@ -109,8 +109,9 @@ def main():
 
 	for n_e in range(args.epochs):
 		print('Training Epoch {}\n\n'.format(n_e))
+		num_batches = int(data.train.num_examples() / args.batch_size)
 		bar = progressbar.ProgressBar(redirect_stdout=True,
-				  max_value=int(data.train.num_examples()/args.batch_size))
+				  					  max_value=num_batches)
 		batch_count = 0
 		training_batch_losses = []
 		while n_e == data.train.epochs_completed():
