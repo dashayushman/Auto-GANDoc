@@ -108,8 +108,12 @@ def main():
 	history = {'training_losses': [], 'validation_losses': [],
 			   'best_loss':float("inf"), 'best_epoch': 0,
 			   'validate_every': args.validate_every}
-
-	for n_e in range(args.epochs):
+	if global_step >= args.epochs:
+		print('Already trained for {} epochs. If you want to train for more '
+			  'number of epochs then set the epochs flag to number that is '
+			  'larger than {}'.format(args.epochs, args.epochs))
+		exit()
+	for n_e in range(global_step, args.epochs):
 		print('Training Epoch {}\n\n'.format(n_e))
 		num_batches = int(data.train.num_examples / args.batch_size)
 		bar = progressbar.ProgressBar(redirect_stdout=True,
