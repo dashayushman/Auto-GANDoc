@@ -141,48 +141,6 @@ def main():
 				save_for_vis(model_samples_dir, batch[0], decoded_images)
 				save_path = saver.save(sess, join(model_chkpnts_dir,
 						"latest_model_{}_temp.ckpt".format(args.data_set)))
-				print('\nValidating Samples\n')
-				val_bar = progressbar.ProgressBar(redirect_stdout=True,
-											  max_value=int(
-												  data.validation.num_examples
-												  / args.batch_size))
-				val_batch_count = 0
-				val_batch_losses = []
-				while data.validation.epochs_completed == 0:
-					val_batch = data.validation.next_batch(args.batch_size)
-					if args.data_set == 'mnist':
-						val_batch = process_mnist_images(val_batch)
-
-					shutil.rmtree(model_val_samples_dir)
-					os.makedirs(model_val_samples_dir)
-
-					val_ag_loss, val_decoded_images = sess.run(
-							[loss['autogan_loss'], outputs['decoder']],
-							feed_dict={
-								input_tensors['input_images'].name:
-									val_batch[0],
-								input_tensors['training'].name: args.train
-							})
-					val_batch_losses.append(val_ag_loss)
-					val_bar.update(batch_count)
-					val_batch_count += 1
-					if (
-						val_batch_count % args.save_every) == 0 and \
-									val_batch_count \
-							!= 0:
-						save_for_vis(model_val_samples_dir, val_batch[0],
-									 val_decoded_images)
-				mean_val_loss = np.mean(val_batch_losses)
-				history['validation_losses'].append(mean_val_loss)
-				if mean_val_loss <= history['best_loss']:
-					history['best_loss'] = mean_val_loss
-					history['best_epoch'] = n_e
-				val_bar.finish()
-				print('\n\nValidation Loss: {}\n'
-					  'Best Loss: {}\nBest Epoch: {}\n\n'.format(
-					mean_val_loss, history['best_loss'], history[
-							'best_epoch']))
-				pickle.dump(history, open(history_path, "wb"))
 		mean_training_loss = np.mean(training_batch_losses)
 		history['training_losses'].append(mean_training_loss)
 		bar.finish()
@@ -215,8 +173,8 @@ def main():
 						   input_tensors['training'].name: args.train
 					    })
 				val_batch_losses.append(ag_loss)
-				batch_count += 1
 				bar.update(batch_count)
+				batch_count += 1
 				if (batch_count % args.save_every) == 0 and batch_count != 0:
 					save_for_vis(model_val_samples_dir, batch[0],
 								 decoded_images)
