@@ -113,6 +113,7 @@ def main():
 			  'number of epochs then set the epochs flag to number that is '
 			  'larger than {}'.format(args.epochs, args.epochs))
 		exit()
+	data.train._epochs_completed = global_step
 	for n_e in range(global_step, args.epochs):
 		print('Training Epoch {}\n\n'.format(n_e))
 		num_batches = int(data.train.num_examples / args.batch_size)
