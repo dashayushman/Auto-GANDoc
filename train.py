@@ -42,7 +42,7 @@ def main():
 	parser.add_argument('--epochs', type=int, default=200,
 						help='Max number of epochs')
 
-	parser.add_argument('--save_every', type=int, default=30,
+	parser.add_argument('--save_every', type=int, default=50,
 						help='Save Model/Samples every x iterations over '
 							 'batches')
 
@@ -127,7 +127,6 @@ def main():
 							input_tensors['training'].name : args.train
 						})
 			training_batch_losses.append(ag_loss)
-			print("\nAG Loss: {}\n".format(ag_loss))
 			summary_writer.add_summary(summary, global_step)
 
 			global_step += 1
@@ -135,6 +134,7 @@ def main():
 			batch_count += 1
 			bar.update(batch_count)
 			if (batch_count % args.save_every) == 0 and batch_count != 0:
+				print("\nAG Loss: {}\n".format(ag_loss))
 				print("Saving Images and the Model\n\n")
 				save_for_vis(model_samples_dir, batch[0], decoded_images)
 				save_path = saver.save(sess, join(model_chkpnts_dir,
