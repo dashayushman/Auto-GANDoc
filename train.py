@@ -5,6 +5,7 @@ import os
 import shutil
 import skimage
 import progressbar
+import math
 
 import tensorflow as tf
 import numpy as np
@@ -109,12 +110,12 @@ def main():
 
 	for n_e in range(args.epochs):
 		print('Training Epoch {}\n\n'.format(n_e))
-		num_batches = int(data.train.num_examples() / args.batch_size)
+		num_batches = int(data.train.num_examples / args.batch_size)
 		bar = progressbar.ProgressBar(redirect_stdout=True,
 				  					  max_value=num_batches)
 		batch_count = 0
 		training_batch_losses = []
-		while n_e == data.train.epochs_completed():
+		while n_e == data.train.epochs_completed:
 			batch = data.train.next_batch(args.batch_size)
 			if args.data_set == 'mnist':
 				batch = process_mnist_images(batch)
@@ -153,10 +154,10 @@ def main():
 		if n_e % args.validate_every == 0:
 			print('\nValidating Samples\n')
 			bar = progressbar.ProgressBar(redirect_stdout=True,
-			  max_value=int(data.validation.num_examples() /args.batch_size))
+			  max_value=int(data.validation.num_examples /args.batch_size))
 			batch_count = 0
 			val_batch_losses = []
-			while data.validation.epochs_completed() == 0:
+			while data.validation.epochs_completed == 0:
 				batch = data.validation.next_batch(args.batch_size)
 				if args.data_set == 'mnist':
 					batch = process_mnist_images(batch)
