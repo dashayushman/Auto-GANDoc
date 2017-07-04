@@ -70,8 +70,8 @@ def main():
 	model_options = {
 		'batch_size': args.batch_size,
 		'image_size': args.image_size,
-		'df_dim': args.gf_dim,
-		'ef_dim': args.df_dim,
+		'df_dim': args.df_dim,
+		'ef_dim': args.ef_dim,
 		'n_classes': args.n_classes
 	}
 
