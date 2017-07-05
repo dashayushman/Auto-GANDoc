@@ -128,8 +128,6 @@ def train(data, args, global_step_tensor, optimizer, sess, loss, outputs,
 				save_for_vis(model_samples_dir, batch[0], decoded_images)
 				save_path = saver.save(sess, join(model_chkpnts_dir,
 						  "latest_model_{}_temp.ckpt".format(args.data_set)))
-				mean_val_loss = validate(data, args, loss, sess, input_tensors,
-										 model_val_samples_dir, outputs)
 
 		mean_training_loss = np.mean(training_batch_losses)
 
