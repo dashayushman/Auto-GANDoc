@@ -17,7 +17,9 @@ def main(args):
 	model_dir, model_chkpnts_dir, model_samples_dir, model_val_samples_dir,\
 			model_summaries_dir, history_path = initialize_directories(args)
 
-	data = load_training_data(data_dir=args.data_dir, data_set=args.data_set)
+	data = load_training_data(data_dir=args.data_dir,
+                                data_set=args.data_set,
+                                dataset_index=args.dataset_index)
 	model_options = load_model_options(args, model_dir)
 	# Initialize and build the GAN model
 	auto_gan = model.AutoGAN(model_options)
@@ -202,14 +204,15 @@ def process_mnist_images(batch, output_shape=(128, 128)):
 	return [output_images, batch[1]]
 
 
-def load_training_data(data_dir, data_set) :
+def load_training_data(data_dir, data_set, dataset_index) :
 	datasets_root_dir = join(data_dir, 'datasets')
 	if data_set == 'mnist' :
 		return input_data.read_data_sets('MNIST_data', one_hot=True)
 	elif data_set == 'flowers':
 		raise NotImplementedError()
 	elif data_set == 'tobacco':
-		raise NotImplementedError()
+                return datasets.tobacco.read_data_sets(one_hot=True,
+                                    dataset_index=dataset_index)
 	else :
 		raise NotImplementedError()
 
@@ -296,6 +299,13 @@ if __name__ == '__main__' :
 
 	parser.add_argument('--validate_every', type=int, default=1,
 						help='run validation after how many epochs')
+
+	parser.add_argument('--dataset_index', type=int, default=0,
+						help='Used for datasets that contain multiple ' +
+                            'versions, like the tobacco dataset, that is ' +
+                            'composed by multiple randomly generated file ' +
+                            'lists, all of them potentially overlapping ' +
+                            'with each other.')
 
 	args = parser.parse_args()
 
