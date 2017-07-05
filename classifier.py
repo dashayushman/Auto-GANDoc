@@ -66,7 +66,7 @@ def main(args):
 
 	train(data, args, global_step_tensor, ag_optim, sess, loss,input_tensors,
 		  merged, summary_writer, saver, checks, model_save_chkpnts_dir,
-		  on_epoch_complete, test=True)
+		  model_options['batch_size'], on_epoch_complete, test=True)
 
 def load_model_options(args, model_dir):
 	options_path = os.path.join(model_dir, 'model_options.pkl')
@@ -115,7 +115,7 @@ def load_checkpoint(checkpoints_dir, sess, saver):
 
 def train(data, args, global_step_tensor, optimizer, sess, loss,
 		  input_tensors, merged_summaries, summary_writer, saver,
-		  checks, model_chkpnts_dir, on_epoch_complete, test=False):
+		  checks, model_chkpnts_dir, batch_size, on_epoch_complete, test=False):
 
 	global_step = global_step_tensor.eval()
 	gs_assign_op = global_step_tensor.assign(global_step)
@@ -127,12 +127,12 @@ def train(data, args, global_step_tensor, optimizer, sess, loss,
 	data.train._epochs_completed = global_step
 	for n_e in range(global_step, args.epochs):
 		print('Training Epoch {}\n'.format(n_e))
-		num_batches = int(data.train.num_examples / args.batch_size)
+		num_batches = int(data.train.num_examples / batch_size)
 		bar = progressbar.ProgressBar(redirect_stdout=True,
 									  max_value=num_batches)
 		batch_count, training_batch_losses, training_batch_accs = 0, [], []
 		while n_e == data.train.epochs_completed:
-			batch = data.train.next_batch(args.batch_size)
+			batch = data.train.next_batch(batch_size)
 			if args.data_set == 'mnist':
 				batch = process_mnist_images(batch)
 
@@ -166,13 +166,13 @@ def train(data, args, global_step_tensor, optimizer, sess, loss,
 
 		if n_e % args.validate_every == 0:
 			mean_val_loss, mean_val_acc = validate(data, args, loss, sess,
-													   input_tensors, checks)
+										   input_tensors, checks, batch_size)
 			on_epoch_complete(mean_val_loss, mean_val_acc,
 							  mean_training_loss, mean_training_accuracy, n_e)
 	if test:
 		print('Testing teh Classifier Model')
-		test_loss, test_acc = test(data, args, loss, sess,
-										   input_tensors, checks)
+		test_loss, test_acc = testing(data, args, loss, sess,
+										   input_tensors, checks, batch_size)
 		print('Test Loss: {}\nTest Acc: {}'.format(test_loss, test_acc))
 
 
@@ -183,17 +183,17 @@ def save_epoch_model(saver, sess, checkpoints_dir, epoch):
 	save_path = saver.save(sess, join(epoch_dir,
 		  "model_after_{}_epoch_{}.ckpt".format(args.data_set, epoch)))
 
-def validate(data, args, loss, sess, input_tensors, checks):
+def validate(data, args, loss, sess, input_tensors, checks, batch_size):
 
 	print('\nValidating Samples\n')
 	bar = progressbar.ProgressBar(redirect_stdout=True,
 								  max_value=int(
 									  data.validation.num_examples /
-									  args.batch_size))
+									  batch_size))
 	batch_count = 0
 	val_batch_losses, val_batch_accuracies = [], []
 	while data.validation.epochs_completed == 0:
-		batch = data.validation.next_batch(args.batch_size)
+		batch = data.validation.next_batch(batch_size)
 		if args.data_set == 'mnist':
 			batch = process_mnist_images(batch)
 
@@ -211,16 +211,16 @@ def validate(data, args, loss, sess, input_tensors, checks):
 	bar.finish()
 	return np.nanmean(val_batch_losses), np.nanmean(val_batch_accuracies)
 
-def test(data, args, loss, sess, input_tensors, checks):
+def testing(data, args, loss, sess, input_tensors, checks, batch_size):
 
 	print('\nValidating Samples\n')
 	bar = progressbar.ProgressBar(redirect_stdout=True,
 								  max_value=int(data.test.num_examples /
-															  args.batch_size))
+																batch_size))
 	batch_count = 0
 	test_batch_losses, test_batch_accuracies = [], []
 	while data.test.epochs_completed == 0:
-		batch = data.test.next_batch(args.batch_size)
+		batch = data.test.next_batch(batch_size)
 		if args.data_set == 'mnist':
 			batch = process_mnist_images(batch)
 
