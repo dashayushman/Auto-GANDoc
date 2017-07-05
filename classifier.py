@@ -14,9 +14,8 @@ from skimage.transform import resize
 from tensorflow.examples.tutorials.mnist import input_data
 
 def main(args):
-	model_dir, model_load_chkpnts_dir, model_save_chkpnts_dir, \
-	model_samples_dir, model_val_samples_dir, model_summaries_dir, \
-								history_path = initialize_directories(args)
+	model_dir, model_load_chkpnts_dir, model_save_chkpnts_dir,\
+	model_summaries_dir, history_path = initialize_directories(args)
 
 	data = load_training_data(data_dir=args.data_dir, data_set=args.data_set)
 	model_options = load_model_options(model_dir)
