@@ -208,6 +208,7 @@ def validate(data, args, loss, sess, input_tensors, checks, batch_size):
 		val_batch_accuracies.append(accuracy)
 		bar.update(batch_count)
 		batch_count += 1
+	data.validation._epochs_completed = 0
 	bar.finish()
 	return np.nanmean(val_batch_losses), np.nanmean(val_batch_accuracies)
 
@@ -235,6 +236,7 @@ def testing(data, args, loss, sess, input_tensors, checks, batch_size):
 		test_batch_accuracies.append(accuracy)
 		bar.update(batch_count)
 		batch_count += 1
+	data.test._epochs_completed = 0
 	bar.finish()
 	return np.nanmean(test_batch_losses), np.nanmean(test_batch_accuracies)
 
