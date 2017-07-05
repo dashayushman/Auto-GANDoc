@@ -129,7 +129,7 @@ def train(data, args, global_step_tensor, optimizer, sess, loss, outputs,
 				save_path = saver.save(sess, join(model_chkpnts_dir,
 						  "latest_model_{}_temp.ckpt".format(args.data_set)))
 
-		mean_training_loss = np.mean(training_batch_losses)
+		mean_training_loss = np.nanmean(training_batch_losses)
 
 		bar.finish()
 		save_epoch_model(saver, sess, model_chkpnts_dir, n_e)
@@ -175,7 +175,7 @@ def validate(data, args, loss, sess, input_tensors, model_val_samples_dir,
 			save_for_vis(model_val_samples_dir, batch[0],
 						 decoded_images)
 	bar.finish()
-	return np.mean(val_batch_losses)
+	return np.np.nanmean(val_batch_losses)
 
 
 def process_mnist_images(batch, output_shape=(128, 128)):
