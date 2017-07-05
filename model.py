@@ -179,6 +179,106 @@ class AutoGAN:
 		
 		return h4, h4_shape
 
+
+	def build_encoder(self):
+		print('Initializing placeholder')
+		img_size = self.options['image_size']
+		image = tf.placeholder('float32', [self.options['batch_size'],
+										   img_size, img_size, 3],
+							   name='input_image')
+		classes = tf.placeholder('int32', [self.options['batch_size'],
+										 self.options['n_classes']],
+							   name='input_classes')
+
+		training = tf.placeholder(tf.bool, name='training')
+
+		print('Building the Classifier')
+		logits = self.classifier(image, self.options['n_classes'], training)
+		loss = tf.reduce_mean(
+				tf.nn.softmax_cross_entropy_with_logits(labels=classes,
+														logits=logits))
+		correct_prediction = tf.equal(tf.argmax(logits, 1),
+									  tf.argmax(classes, 1))
+		accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+		t_vars = tf.trainable_variables()
+		self.add_tb_histogram_summaries(t_vars)
+		self.add_scalar_summary('accuracy', accuracy)
+		self.add_scalar_summary('loss', loss)
+
+		clf_vars = [var for var in t_vars if 'e_' in var.name or
+							 'fl_' in var.name or 'global_' in var.name]
+		e_vars = [var for var in t_vars if 'e_' in var.name]
+		fl_vars = [var for var in t_vars if 'fl_' in var.name]
+
+		input_tensors = {
+			'input_images': image,
+			'classes': classes,
+			'training': training,
+		}
+
+		variables = {
+			'clf_vars': clf_vars,
+			'e_vars': e_vars,
+			'fl_vars': fl_vars
+		}
+
+		loss = {
+			'autogan_loss': loss,
+		}
+
+		checks = {
+			'loss': loss,
+			'accuracy': accuracy
+		}
+
+		return input_tensors, variables, loss, checks
+
+
+	def classifier(self, image, n_classes, t_training, reuse=False):
+
+		if reuse:
+			tf.get_variable_scope().reuse_variables()
+
+		h0 = ops.lrelu(ops.conv2d(image, self.options['ef_dim'] * 8,
+								  name='e_h0_conv'))  # 64
+
+		h1 = ops.lrelu(slim.batch_norm(ops.conv2d(h0,
+												  self.options['ef_dim'] * 8,
+												  name='e_h1_conv'),
+									   reuse=reuse,
+									   is_training=t_training,
+									   scope='e_bn1'))  # 32
+
+		h2 = ops.lrelu(slim.batch_norm(ops.conv2d(h1,
+												  self.options['ef_dim'] * 6,
+												  name='e_h2_conv'),
+									   reuse=reuse,
+									   is_training=t_training,
+									   scope='e_bn2'))  # 16
+		h3 = ops.lrelu(slim.batch_norm(ops.conv2d(h2,
+												  self.options['ef_dim'] * 4,
+												  name='e_h3_conv'),
+									   reuse=reuse,
+									   is_training=t_training,
+									   scope='e_bn3'))  # 8
+
+		h4 = ops.lrelu(slim.batch_norm(ops.conv2d(h3,
+												  self.options['ef_dim'] * 2,
+												  name='e_h4_conv'),
+									   reuse=reuse,
+									   is_training=t_training,
+									   scope='e_bn4'))  # 8
+		h4_shape = h4.get_shape().as_list()
+		h4_flat = tf.nn.avg_pool(h4, ksize=[1, h4_shape[1], h4_shape[2], 1],
+								 strides=[1, h4_shape[1], h4_shape[2], 1],
+								 padding='SAME', name='global_avg_pool')
+
+		fc1 = tf.nn.relu(ops.linear(h4_flat, 1024, 'fl_e_01'))
+		fc2 = ops.linear(fc1, n_classes, 'fl_e_02')
+
+		return fc2
+
 	# This has not been used used yet but can be used
 	def attention(self, decoder_output, seq_outputs, output_size, time_steps,
 			reuse=False) :
