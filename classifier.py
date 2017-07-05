@@ -277,15 +277,18 @@ def initialize_directories(args):
 	if not os.path.exists(model_load_chkpnts_dir):
 		os.makedirs(model_load_chkpnts_dir)
 
-	model_save_chkpnts_dir = join(model_dir, 'classifier', 'checkpoints')
+	model_save_chkpnts_dir = join(model_dir, 'classifier', args.data_set,
+								  'checkpoints')
 	if not os.path.exists(model_save_chkpnts_dir):
 		os.makedirs(model_save_chkpnts_dir)
 
-	model_summaries_dir = join(model_dir, 'classifier', 'summaries')
+	model_summaries_dir = join(model_dir, 'classifier', args.data_set,
+							   'summaries')
 	if not os.path.exists(model_summaries_dir):
 		os.makedirs(model_summaries_dir)
 
-	history_path = os.path.join(model_dir,'classifier', 'history.pkl')
+	history_path = os.path.join(model_dir,'classifier', args.data_set ,
+								'history.pkl')
 
 	return model_dir, model_load_chkpnts_dir, model_save_chkpnts_dir, \
 		   model_summaries_dir, history_path
