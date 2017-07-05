@@ -66,7 +66,7 @@ def main(args):
 
 	train(data, args, global_step_tensor, ag_optim, sess, loss,input_tensors,
 		  merged, summary_writer, saver, checks, model_save_chkpnts_dir,
-		  on_epoch_complete)
+		  on_epoch_complete, test=True)
 
 def load_model_options(args, model_dir):
 	options_path = os.path.join(model_dir, 'model_options.pkl')
@@ -107,7 +107,7 @@ def load_checkpoint(checkpoints_dir, sess, saver):
 
 def train(data, args, global_step_tensor, optimizer, sess, loss,
 		  input_tensors, merged_summaries, summary_writer, saver,
-		  checks, model_chkpnts_dir, on_epoch_complete):
+		  checks, model_chkpnts_dir, on_epoch_complete, test=False):
 
 	global_step = global_step_tensor.eval()
 	gs_assign_op = global_step_tensor.assign(global_step)
@@ -161,6 +161,11 @@ def train(data, args, global_step_tensor, optimizer, sess, loss,
 													   input_tensors, checks)
 			on_epoch_complete(mean_val_loss, mean_val_acc,
 							  mean_training_loss, mean_training_accuracy, n_e)
+	if test:
+		print('Testing teh Classifier Model')
+		test_loss, test_acc = test(data, args, loss, sess,
+										   input_tensors, checks)
+		print('Test Loss: {}\nTest Acc: {}'.format(test_loss, test_acc))
 
 
 def save_epoch_model(saver, sess, checkpoints_dir, epoch):
@@ -197,6 +202,33 @@ def validate(data, args, loss, sess, input_tensors, checks):
 		batch_count += 1
 	bar.finish()
 	return np.nanmean(val_batch_losses), np.nanmean(val_batch_accuracies)
+
+def test(data, args, loss, sess, input_tensors, checks):
+
+	print('\nValidating Samples\n')
+	bar = progressbar.ProgressBar(redirect_stdout=True,
+								  max_value=int(data.test.num_examples /
+															  args.batch_size))
+	batch_count = 0
+	test_batch_losses, test_batch_accuracies = [], []
+	while data.test.epochs_completed == 0:
+		batch = data.test.next_batch(args.batch_size)
+		if args.data_set == 'mnist':
+			batch = process_mnist_images(batch)
+
+		ag_loss, accuracy = sess.run(
+				[loss['autogan_loss'], checks['accuracy']],
+				feed_dict={
+					input_tensors['input_images'].name: batch[0],
+					input_tensors['classes'].name: batch[1],
+					input_tensors['training'].name: args.train
+				})
+		test_batch_losses.append(ag_loss)
+		test_batch_accuracies.append(accuracy)
+		bar.update(batch_count)
+		batch_count += 1
+	bar.finish()
+	return np.nanmean(test_batch_losses), np.nanmean(test_batch_accuracies)
 
 
 def process_mnist_images(batch, output_shape=(128, 128)):
