@@ -60,7 +60,7 @@ def main(args):
 
 	train(data, args, global_step_tensor, ag_optim, sess, loss, outputs,
 		  input_tensors, merged, summary_writer, saver, model_samples_dir,
-		  model_chkpnts_dir, history, model_val_samples_dir, on_epoch_complete)
+		  model_chkpnts_dir, model_val_samples_dir, on_epoch_complete)
 
 
 def load_history(history_path):
