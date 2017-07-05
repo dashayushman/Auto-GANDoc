@@ -175,7 +175,7 @@ def validate(data, args, loss, sess, input_tensors, model_val_samples_dir,
 			save_for_vis(model_val_samples_dir, batch[0],
 						 decoded_images)
 	bar.finish()
-	return np.np.nanmean(val_batch_losses)
+	return np.nanmean(val_batch_losses)
 
 
 def process_mnist_images(batch, output_shape=(128, 128)):
