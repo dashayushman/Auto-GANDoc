@@ -164,9 +164,6 @@ def validate(data, args, loss, sess, input_tensors, model_val_samples_dir,
 		if args.data_set == 'mnist':
 			batch = process_mnist_images(batch)
 
-		shutil.rmtree(model_val_samples_dir)
-		os.makedirs(model_val_samples_dir)
-
 		ag_loss, decoded_images = sess.run(
 				[loss['autogan_loss'], outputs['decoder']],
 				feed_dict={
