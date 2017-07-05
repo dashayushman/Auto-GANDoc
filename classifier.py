@@ -18,7 +18,7 @@ def main(args):
 	model_summaries_dir, history_path = initialize_directories(args)
 
 	data = load_training_data(data_dir=args.data_dir, data_set=args.data_set)
-	model_options = load_model_options(model_dir)
+	model_options = load_model_options(args, model_dir)
 	if args.data_set == 'mnist':
 		model_options['n_classes'] = 10
 	else:
