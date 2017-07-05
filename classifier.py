@@ -72,13 +72,10 @@ def load_model_options(args, model_dir):
 	options_path = os.path.join(model_dir, 'model_options.pkl')
 	model_options = None
 	if not os.path.exists(options_path):
-		model_options = {
-			'batch_size': args.batch_size,
-			'image_size': args.image_size,
-			'df_dim': args.df_dim,
-			'ef_dim': args.ef_dim
-		}
-		pickle.dump(model_options, open(options_path, "wb"))
+		raise Exception('Model parameters not found at {}\n'
+						'Either the you have not performed the '
+						'pretraining or you are passing a wrong '
+						'"model_name"'.format(options_path))
 	else:
 		model_options = pickle.load(open(options_path, "rb"))
 	return model_options
