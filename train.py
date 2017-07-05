@@ -33,7 +33,7 @@ def main(args):
 						 beta1=args.beta1).minimize(loss['autogan_loss'],
 						 var_list=variables['ag_vars'])
 
-	global_step_tensor = tf.Variable(1, trainable=False, name='global_step')
+	global_step_tensor = tf.Variable(0, trainable=False, name='global_step')
 	merged = tf.summary.merge_all()
 	sess = tf.InteractiveSession()
 
