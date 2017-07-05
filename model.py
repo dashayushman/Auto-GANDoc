@@ -275,7 +275,7 @@ class AutoGAN:
 								 padding='SAME', name='global_avg_pool'))
 
 		#fc1 = tf.nn.relu(ops.linear(h4_flat, 1024, 'fl_e_01'))
-		fc2 = ops.linear(h4_flat, n_classes, 'fl_e_02')
+		fc2 = ops.linear(h4_flat, n_classes, 'fl_02')
 
 		return fc2
 
