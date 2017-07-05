@@ -183,6 +183,7 @@ def validate(data, args, loss, sess, input_tensors, model_val_samples_dir,
 		if (batch_count % 50) == 0 and batch_count != 0:
 			save_for_vis(model_val_samples_dir, batch[0],
 						 decoded_images)
+	data.validation._epochs_completed = 0
 	bar.finish()
 	return np.nanmean(val_batch_losses)
 

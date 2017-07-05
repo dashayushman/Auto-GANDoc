@@ -39,7 +39,8 @@ def main(args):
 
 	tf.global_variables_initializer().run()
 	model_loader = tf.train.Saver(var_list=variables['e_vars'])
-	saver = tf.train.Saver(var_list=variables['fl_vars'], max_to_keep=10000)
+	saver = tf.train.Saver(var_list=variables['fl_vars'] + [global_step_tensor],
+						   max_to_keep=10000)
 
 	load_checkpoint(model_load_chkpnts_dir, sess, model_loader)
 	if args.resume_model:
@@ -208,6 +209,7 @@ def validate(data, args, loss, sess, input_tensors, checks, batch_size):
 		val_batch_accuracies.append(accuracy)
 		bar.update(batch_count)
 		batch_count += 1
+	data.validation._epochs_completed = 0
 	bar.finish()
 	return np.nanmean(val_batch_losses), np.nanmean(val_batch_accuracies)
 
@@ -235,6 +237,7 @@ def testing(data, args, loss, sess, input_tensors, checks, batch_size):
 		test_batch_accuracies.append(accuracy)
 		bar.update(batch_count)
 		batch_count += 1
+	data.test._epochs_completed = 0
 	bar.finish()
 	return np.nanmean(test_batch_losses), np.nanmean(test_batch_accuracies)
 
