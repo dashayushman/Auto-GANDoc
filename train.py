@@ -53,8 +53,8 @@ def main(args):
 			history['best_loss'] = val_loss
 			history['best_epoch'] = epoch
 
-		print('\n\nTraining Loss: {}\nValidation Loss: {}\n'
-			  'Best Loss: {}\nBest Epoch: {}\n\n'.format(train_loss,
+		print('\nTraining Loss: {}\nValidation Loss: {}\n'
+			  'Best Loss: {}\nBest Epoch: {}\n'.format(train_loss,
 			   val_loss, history['best_loss'], history['best_epoch']))
 		pickle.dump(history, open(history_path, "wb"))
 
@@ -98,7 +98,7 @@ def train(data, args, global_step_tensor, optimizer, sess, loss, outputs,
 		exit()
 	data.train._epochs_completed = global_step
 	for n_e in range(global_step, args.epochs):
-		print('Training Epoch {}\n\n'.format(n_e))
+		print('Training Epoch {}\n'.format(n_e))
 		num_batches = int(data.train.num_examples / args.batch_size)
 		bar = progressbar.ProgressBar(redirect_stdout=True,
 									  max_value=num_batches)
@@ -124,7 +124,7 @@ def train(data, args, global_step_tensor, optimizer, sess, loss, outputs,
 			batch_count += 1
 			if (batch_count % args.save_every) == 0 and batch_count != 0:
 				print("\nAG Loss: {}\n".format(ag_loss))
-				print("Saving Images and the Model\n\n")
+				print("Saving Images and the Model\n")
 				save_for_vis(model_samples_dir, batch[0], decoded_images)
 				save_path = saver.save(sess, join(model_chkpnts_dir,
 						  "latest_model_{}_temp.ckpt".format(args.data_set)))
