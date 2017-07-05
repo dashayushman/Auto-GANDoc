@@ -39,11 +39,11 @@ def main(args):
 
 	tf.global_variables_initializer().run()
 	model_loader = tf.train.Saver(var_list=variables['e_vars'])
-	saver = tf.train.Saver(max_to_keep=10000)
+	saver = tf.train.Saver(var_list=variables['fl_vars'], max_to_keep=10000)
 
 	load_checkpoint(model_load_chkpnts_dir, sess, model_loader)
 	if args.resume_model:
-		load_checkpoint(model_save_chkpnts_dir, sess, saver)
+		load_checkpoint_clf(model_save_chkpnts_dir, sess, saver)
 
 	history = load_history(history_path)
 
@@ -92,6 +92,14 @@ def load_history(history_path):
 				   'validate_every': args.validate_every}
 	return history
 
+def load_checkpoint_clf(checkpoints_dir, sess, saver):
+	print('Trying to resume training from a previous checkpoint' +
+		  str(tf.train.latest_checkpoint(checkpoints_dir)))
+	if tf.train.latest_checkpoint(checkpoints_dir) is not None:
+		saver.restore(sess, tf.train.latest_checkpoint(checkpoints_dir))
+		print('Successfully loaded model. Resuming training.')
+	else:
+		print('Could not find the checkpoints. Training fresh model weights.')
 
 def load_checkpoint(checkpoints_dir, sess, saver):
 	print('Trying to resume training from a previous checkpoint' +
