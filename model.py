@@ -29,8 +29,7 @@ class AutoGAN:
 		training = tf.placeholder(tf.bool, name='training')
 
 		print('Building the Encoder')
-		en_image, en_image_shape = self.encoder(image,
-							self.options['n_classes'], training)
+		en_image, en_image_shape = self.encoder(image, training)
 
 		print('Building the Generator')
 		gen_image = self.decoder(en_image, training)
@@ -136,7 +135,7 @@ class AutoGAN:
 
 	# DISCRIMINATOR IMPLEMENTATION based on :
 	# https://github.com/carpedm20/DCGAN-tensorflow/blob/master/model.py
-	def encoder(self, image, n_classes, t_training, reuse = False) :
+	def encoder(self, image, t_training, reuse = False) :
 
 		if reuse :
 			tf.get_variable_scope().reuse_variables()
