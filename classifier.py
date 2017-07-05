@@ -39,7 +39,8 @@ def main(args):
 
 	tf.global_variables_initializer().run()
 	model_loader = tf.train.Saver(var_list=variables['e_vars'])
-	saver = tf.train.Saver(var_list=variables['fl_vars'], max_to_keep=10000)
+	saver = tf.train.Saver(var_list=variables['fl_vars'] + [global_step_tensor],
+						   max_to_keep=10000)
 
 	load_checkpoint(model_load_chkpnts_dir, sess, model_loader)
 	if args.resume_model:
