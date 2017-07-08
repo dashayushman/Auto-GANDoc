@@ -269,13 +269,16 @@ class AutoGAN:
 									   is_training=t_training,
 									   scope='e_bn4'))  # 8
 		h4_shape = h4.get_shape().as_list()
+		h4_flat = tf.contrib.layers.flatten(h4)
+		'''
 		h4_flat = tf.squeeze(tf.nn.avg_pool(h4, ksize=[1, h4_shape[1],
 													 h4_shape[2], 1],
 								 strides=[1, h4_shape[1], h4_shape[2], 1],
 								 padding='SAME', name='global_avg_pool'))
 
-		#fc1 = tf.nn.relu(ops.linear(h4_flat, 1024, 'fl_e_01'))
-		fc2 = ops.linear(h4_flat, n_classes, 'fl_02')
+		'''
+		fc1 = tf.nn.relu(ops.linear(h4_flat, 1024, 'fl_01'))
+		fc2 = ops.linear(fc1, n_classes, 'fl_02')
 
 		return fc2
 

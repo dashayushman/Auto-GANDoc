@@ -277,7 +277,8 @@ def initialize_directories(args):
 	if not os.path.exists(model_load_chkpnts_dir):
 		os.makedirs(model_load_chkpnts_dir)
 
-	if_tobacco = str(args.dataset_index) if args.data_set == 'tobacco' else ''
+	if_tobacco = '_' + str(args.dataset_index) \
+								if args.dataset_index is not None else ''
 
 	model_save_chkpnts_dir = join(model_dir, 'classifier',
 								  args.data_set + if_tobacco, 'checkpoints')
@@ -334,6 +335,12 @@ if __name__ == '__main__' :
 
 	parser.add_argument('--data_set', type=str, default="mnist",
 						help='Dat set: mnist, flowers')
+
+	parser.add_argument('--dataset_index', type=str, default=None,
+						help='An index for the dataset. Useful while testing '
+						 'the tobacco dataset but can be used for other '
+						 'datasets to keep track of different experiments '
+						 'as they will all be saved in different directories')
 
 	parser.add_argument('--model_name', type=str, default="AutoGANDoc",
 						help='model_1 or model_2')
