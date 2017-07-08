@@ -35,29 +35,65 @@ SOURCE_URL = 'https://storage.googleapis.com/cvdf-datasets/mnist/'
 
 class DataSet(object):
 
-    def __init__(self):
-        pass
+    def __init__(self,
+                 images,
+                 labels,
+                 one_hot=False,
+                 dtype=dtype.float32,
+                 reshape=[128, 128],
+                 seed=None):
 
+        dtype = dtypes.as_dtype(dtype).base_dtype
+        if dtype not in (dtypes.uint8, dtypes.float32):
+            raise TypeError(
+                    'Invalid image dtype %r, expected uint8 or float32'.format(
+                            dtype))
+
+        assert len(images) == len(labels), (
+            'len(images): %s len(labels): %s'format(images.shape, labels.shape))
+
+        # Shuffling inspired by
+        # https://stackoverflow.com/questions/23289547/shuffle-two-list-at-once-with-same-order
+        images_and_labels = list(zip(images, labels))
+        random.seed(seed)
+        random.shuffle(images_and_labels)
+        images, labels = zip(*images_and_labels)
+
+        self._images = images
+        self._labels = labels
+        self._epochs_completed = 0
+        self._index_in_epoch = 0
+
+    @property
+    def num_examples(self):
+        return self._num_examples
+
+    @property
+    def epochs_completed(self):
+        return self._epochs_completed
+
+    def next_batch(self, batch_size, fake_data=False, shuffle=True):
+        start = self._index_in_epoch
 
 def read_data_sets(one_hot=False,
                    reshape=[128, 128],
                    seed=None,
                    dataset_index=dataset_index):
-
     dataset_path = os.path.join('data', 'datasets', 'tobacco')
 
     train_list = os.path.join(dataset_path, 'train_{}.txt'.format(dataset_index))
-    validation_list = os.path.join(dataset_path, 'validation_{}.txt'.format(dataset_index))
+    validation_list = os.path.join(dataset_path,
+                'validation_{}.txt'.format(dataset_index))
     test_list = os.path.join(dataset_path, 'test_{}.txt'.format(dataset_index))
 
     with open(train_list, 'rb') as f:
-        train_images = parse_data_list(f)
+        train_images, train_labels = parse_data_list(f)
 
     with open(validation_list, 'rb') as f:
-        validation_images = parse_data_list(f)
+        validation_images, validation_labels = parse_data_list(f)
 
     with open(test_list, 'rb') as f:
-        test_images = parse_data_list(f)
+        test_images, test_labels = parse_data_list(f)
 
     options = dict(dtype=dtype, reshape=reshape, seed=seed)
 
@@ -72,7 +108,16 @@ def parse_data_list(f):
     # <path_to_file> <class>
     # where `class` is a number, and the mapping between the number and the
     # name of the class is in another file called `labels.txt`
-    return list(csv.reader(f, delimiter=' '))
+    return zip(*list(csv.reader(f, delimiter=' ')))
+
+    # This is equivalent to:
+    #images = []
+    #labels = []
+    #csv_reader = csv.reader(f, delimiter=' ')
+    #for row in csv_reader:
+    #    images.append(row[0])
+    #    labels.append(row[1])
+    #return images, labels
 
 def _read32(bytestream):
   dt = numpy.dtype(numpy.uint32).newbyteorder('>')
@@ -172,7 +217,6 @@ class DataSet(object):
     else:
       assert images.shape[0] == labels.shape[0], (
           'images.shape: %s labels.shape: %s' % (images.shape, labels.shape))
-      self._num_examples = images.shape[0]
 
       # Convert shape from [num examples, rows, columns, depth]
       # to [num examples, rows*columns] (assuming depth == 1)
