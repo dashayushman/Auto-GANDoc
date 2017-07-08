@@ -39,11 +39,25 @@ class DataSet(object):
         pass
 
 
-def read_data_sets(train_dir,
-                   one_hot=False,
+def read_data_sets(one_hot=False,
                    reshape=[128, 128],
-                   seed=None):
+                   seed=None,
+                   dataset_index=dataset_index):
 
+    dataset_path = os.path.join('data', 'datasets', 'tobacco')
+
+    train_list = os.path.join(dataset_path, 'train_{}.txt'.format(dataset_index))
+    validation_list = os.path.join(dataset_path, 'validation_{}.txt'.format(dataset_index))
+    test_list = os.path.join(dataset_path, 'test_{}.txt'.format(dataset_index))
+
+    with open(train_list, 'rb') as f:
+        train_images = parse_data_list(f)
+
+    with open(validation_list, 'rb') as f:
+        validation_images = parse_data_list(f)
+
+    with open(test_list, 'rb') as f:
+        test_images = parse_data_list(f)
 
     options = dict(dtype=dtype, reshape=reshape, seed=seed)
 
@@ -53,7 +67,12 @@ def read_data_sets(train_dir,
 
     return base.Datasets(train=train, validation=validation, test=test)
 
-
+def parse_data_list(f):
+    # The files are composed by several lines in the format
+    # <path_to_file> <class>
+    # where `class` is a number, and the mapping between the number and the
+    # name of the class is in another file called `labels.txt`
+    return list(csv.reader(f, delimiter=' '))
 
 def _read32(bytestream):
   dt = numpy.dtype(numpy.uint32).newbyteorder('>')
