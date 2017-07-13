@@ -13,6 +13,8 @@ from os.path import join
 from skimage.transform import resize
 from tensorflow.examples.tutorials.mnist import input_data
 
+import datasets.tobacco
+
 def main(args):
 	model_dir, model_chkpnts_dir, model_samples_dir, model_val_samples_dir,\
 			model_summaries_dir, history_path = initialize_directories(args)
