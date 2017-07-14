@@ -35,9 +35,9 @@ class DataSet(object):
     def __init__(self,
                  images,
                  labels,
+                 reshape,
                  one_hot=False,
                  dtype=dtypes.float32,
-                 reshape=[128, 128],
                  dataset_path='.',
                  seed=None):
 
@@ -115,6 +115,8 @@ class DataSet(object):
             ret_images = self._images[start:end]
             ret_labels = self._labels[start:end]
 
+        #print("======== {}: Epoch {}, Batch {}".format(
+        #        'next_batch', self._epochs_completed, self._index_in_epoch))
         return self.load_image_files(ret_images), ret_labels
 
     @property
@@ -135,10 +137,16 @@ class DataSet(object):
             img = img.resize((self.reshape[1], self.reshape[0]), Image.BICUBIC)
             w, h = img.size
             img_black_and_white = img.convert('L')
+            del img
+
             img_black_and_white = np.asarray(img_black_and_white,
                                             dtype = np.uint8)
-            img_black_and_white = np.resize(img_black_and_white[:,:], (w, h, 3))
-            ret.append(img_black_and_white)
+            #img_black_and_white = np.resize(img_black_and_white[:,:], (w, h, 3))
+            img_3_channels = np.zeros(shape=(self.reshape[1], self.reshape[0], 3))
+            img_3_channels[:,:,0] = img_black_and_white
+            img_3_channels[:,:,1] = img_black_and_white
+            img_3_channels[:,:,2] = img_black_and_white
+            ret.append(img_3_channels)
         return ret
 
     def dense_to_one_hot(self, labels_dense, num_classes):
@@ -151,7 +159,7 @@ class DataSet(object):
 
 
 def read_data_sets(one_hot=False,
-                   reshape=[128, 128],
+                   reshape=[128,128],
                    seed=None,
                    dataset_index=0):
     dataset_path = os.path.join('data', 'datasets', 'tobacco')

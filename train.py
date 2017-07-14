@@ -21,7 +21,8 @@ def main(args):
 
 	data = load_training_data(data_dir=args.data_dir,
                                 data_set=args.data_set,
-                                dataset_index=args.dataset_index)
+                                dataset_index=args.dataset_index,
+								reshape=args.image_size)
 	model_options = load_model_options(args, model_dir)
 	# Initialize and build the GAN model
 	auto_gan = model.AutoGAN(model_options)
@@ -63,6 +64,8 @@ def main(args):
 def load_model_options(args, model_dir):
 	options_path = os.path.join(model_dir, 'model_options.pkl')
 	model_options = None
+
+
 	if not os.path.exists(options_path):
 		model_options = {
 			'batch_size': args.batch_size,
@@ -73,6 +76,11 @@ def load_model_options(args, model_dir):
 		pickle.dump(model_options, open(options_path, "wb"))
 	else:
 		model_options = pickle.load(open(options_path, "rb"))
+
+	#print('================ {}: Image size: {}'.format(
+	#				'load_model_options',
+	#				model_options['image_size']))
+
 	return model_options
 
 
@@ -113,13 +121,19 @@ def train(data, args, global_step_tensor, optimizer, sess, loss, outputs,
 	for n_e in range(global_step, args.epochs):
 		print('Training Epoch {}\n'.format(n_e))
 		num_batches = int(data.train.num_examples / args.batch_size)
-		bar = progressbar.ProgressBar(redirect_stdout=True,
+		bar = progressbar.ProgressBar(redirect_stdout=False,
 									  max_value=num_batches)
 		batch_count, training_batch_losses = 0, []
 		while n_e == data.train.epochs_completed:
 			batch = data.train.next_batch(args.batch_size)
 			if args.data_set == 'mnist':
 				batch = process_mnist_images(batch)
+
+			#print('=========== {}: args.train: {}'.format(
+			#		'train', args.train))
+
+			#print('=========== {}: len(batch[0]): {}'.format(
+			#		'train', batch[0][0].shape))
 
 			# Encoder Update
 			_, ag_loss, decoded_images, summary = sess.run([optimizer,
@@ -141,6 +155,7 @@ def train(data, args, global_step_tensor, optimizer, sess, loss, outputs,
 				save_for_vis(model_samples_dir, batch[0], decoded_images)
 				save_path = saver.save(sess, join(model_chkpnts_dir,
 						  "latest_model_{}_temp.ckpt".format(args.data_set)))
+			del batch
 
 		mean_training_loss = np.nanmean(training_batch_losses)
 
@@ -149,7 +164,8 @@ def train(data, args, global_step_tensor, optimizer, sess, loss, outputs,
 
 		if n_e % args.validate_every == 0:
 			mean_val_loss = validate(data, args, loss, sess, input_tensors,
-									 model_val_samples_dir, outputs)
+									 model_val_samples_dir, outputs,
+									 args.save_every)
 			on_epoch_complete(mean_val_loss, mean_training_loss, n_e)
 
 
@@ -161,10 +177,10 @@ def save_epoch_model(saver, sess, checkpoints_dir, epoch):
 		  "model_after_{}_epoch_{}.ckpt".format(args.data_set, epoch)))
 
 def validate(data, args, loss, sess, input_tensors, model_val_samples_dir,
-			 outputs):
+			 outputs, save_every=50):
 
 	print('\nValidating Samples\n')
-	bar = progressbar.ProgressBar(redirect_stdout=True,
+	bar = progressbar.ProgressBar(redirect_stdout=False,
 								  max_value=int(
 									  data.validation.num_examples /
 									  args.batch_size))
@@ -184,7 +200,7 @@ def validate(data, args, loss, sess, input_tensors, model_val_samples_dir,
 		val_batch_losses.append(ag_loss)
 		bar.update(batch_count)
 		batch_count += 1
-		if (batch_count % 50) == 0 and batch_count != 0:
+		if (batch_count % save_every) == 0 and batch_count != 0:
 			save_for_vis(model_val_samples_dir, batch[0],
 						 decoded_images)
 	data.validation._epochs_completed = 0
@@ -206,7 +222,7 @@ def process_mnist_images(batch, output_shape=(128, 128)):
 	return [output_images, batch[1]]
 
 
-def load_training_data(data_dir, data_set, dataset_index) :
+def load_training_data(data_dir, data_set, dataset_index, reshape=128) :
 	datasets_root_dir = join(data_dir, 'datasets')
 	if data_set == 'mnist' :
 		return input_data.read_data_sets('MNIST_data', one_hot=True)
@@ -214,7 +230,8 @@ def load_training_data(data_dir, data_set, dataset_index) :
 		raise NotImplementedError()
 	elif data_set == 'tobacco':
                 return datasets.tobacco.read_data_sets(one_hot=True,
-                                    dataset_index=dataset_index)
+                                    dataset_index=dataset_index,
+									reshape=[reshape,reshape])
 	else :
 		raise NotImplementedError()
 
