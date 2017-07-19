@@ -120,7 +120,8 @@ class DataSet(object):
             ret_labels = self._labels[start:end]
 
         if self.one_hot:
-            ret_labels = self.dense_to_one_hot(ret_labels, self.n_classes)
+            ret_labels = np.array(ret_labels).astype(np.int)
+            ret_labels = dense_to_one_hot(ret_labels, self.n_classes)
 
         #print("======== {}: Epoch {}, Batch {}".format(
         #        'next_batch', self._epochs_completed, self._index_in_epoch))
@@ -156,7 +157,7 @@ class DataSet(object):
             ret.append(img_3_channels)
         return ret
 
-def dense_to_one_hot(self, labels_dense, num_classes):
+def dense_to_one_hot(labels_dense, num_classes):
     """Convert class labels from scalars to one-hot vectors.
 
         E.g., if labels_dense is an nparray of shape (10,), and num_classes
@@ -194,7 +195,7 @@ def read_data_sets(one_hot=False,
         classes = list(list(parse_data_list(f))[0])
 
     options = dict(reshape=reshape, seed=seed, dataset_path=dataset_path,
-                    classes=classes)
+                    classes=classes, one_hot=one_hot)
 
 
     train = DataSet(train_images, train_labels, **options)
