@@ -125,7 +125,7 @@ def train(data, args, global_step_tensor, optimizer, sess, loss, outputs,
 									  max_value=num_batches)
 		batch_count, training_batch_losses = 0, []
 		while n_e == data.train.epochs_completed:
-			batch = data.train.next_batch(args.batch_size)
+			batch = data.train.next_batch(args.batch_size, args.shuffle)
 			if args.data_set == 'mnist':
 				batch = process_mnist_images(batch)
 
@@ -187,7 +187,7 @@ def validate(data, args, loss, sess, input_tensors, model_val_samples_dir,
 	batch_count = 0
 	val_batch_losses = []
 	while data.validation.epochs_completed == 0:
-		batch = data.validation.next_batch(args.batch_size)
+		batch = data.validation.next_batch(args.batch_size, args.shuffle)
 		if args.data_set == 'mnist':
 			batch = process_mnist_images(batch)
 
@@ -315,6 +315,9 @@ if __name__ == '__main__' :
 
 	parser.add_argument('--train', type=bool, default=True,
 						help='True while training and otherwise')
+
+	parser.add_argument('--shuffle', type=bool, default=True,
+						help='Shuffle dataset at the end of the epoch')
 
 	parser.add_argument('--validate_every', type=int, default=1,
 						help='run validation after how many epochs')

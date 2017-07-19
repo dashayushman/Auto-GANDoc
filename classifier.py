@@ -9,6 +9,8 @@ import pickle
 import tensorflow as tf
 import numpy as np
 
+import datasets.tobacco
+
 from os.path import join
 from skimage.transform import resize
 from tensorflow.examples.tutorials.mnist import input_data
@@ -17,12 +19,15 @@ def main(args):
 	model_dir, model_load_chkpnts_dir, model_save_chkpnts_dir,\
 	model_summaries_dir, history_path = initialize_directories(args)
 
-	data = load_training_data(data_dir=args.data_dir, data_set=args.data_set)
 	model_options = load_model_options(args, model_dir)
+	data = load_training_data(data_dir=args.data_dir, data_set=args.data_set,
+							  reshape=model_options['image_size'],
+							  dataset_index=args.dataset_index)
+
 	if args.data_set == 'mnist':
 		model_options['n_classes'] = 10
 	else:
-		model_options['n_classes'] = data.training.n_classes
+		model_options['n_classes'] = data.train.n_classes
 	# Initialize and build the GAN model
 	auto_gan = model.AutoGAN(model_options)
 	input_tensors, variables, loss, checks = auto_gan.build_encoder()
@@ -256,14 +261,16 @@ def process_mnist_images(batch, output_shape=(128, 128)):
 	return [output_images, batch[1]]
 
 
-def load_training_data(data_dir, data_set) :
+def load_training_data(data_dir, data_set, reshape=128, dataset_index=0) :
 	datasets_root_dir = join(data_dir, 'datasets')
 	if data_set == 'mnist' :
 		return input_data.read_data_sets('MNIST_data', one_hot=True)
 	elif data_set == 'flowers':
 		raise NotImplementedError()
 	elif data_set == 'tobacco':
-		raise NotImplementedError()
+		return datasets.tobacco.read_data_sets(one_hot=True,
+											   dataset_index=dataset_index,
+											   reshape=[reshape, reshape])
 	else :
 		raise NotImplementedError()
 
@@ -311,9 +318,6 @@ def save_for_vis(data_dir, real_images, generated_images) :
 if __name__ == '__main__' :
 	parser = argparse.ArgumentParser()
 
-	parser.add_argument('--n_classes', type=int, default=102,
-						help='Number of classes/class labels')
-
 	parser.add_argument('--data_dir', type=str, default="Data",
 						help='Data Directory')
 
@@ -336,7 +340,7 @@ if __name__ == '__main__' :
 	parser.add_argument('--data_set', type=str, default="mnist",
 						help='Dat set: mnist, flowers')
 
-	parser.add_argument('--dataset_index', type=str, default=None,
+	parser.add_argument('--dataset_index', type=str, default=0,
 						help='An index for the dataset. Useful while testing '
 						 'the tobacco dataset but can be used for other '
 						 'datasets to keep track of different experiments '
