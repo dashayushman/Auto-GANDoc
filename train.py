@@ -20,8 +20,8 @@ def main(args):
 			model_summaries_dir, history_path = initialize_directories(args)
 
 	data = load_training_data(data_dir=args.data_dir,
-                                data_set=args.data_set,
-                                dataset_index=args.dataset_index,
+								data_set=args.data_set,
+								dataset_index=args.dataset_index,
 								reshape=args.image_size)
 	model_options = load_model_options(args, model_dir)
 	# Initialize and build the GAN model
@@ -29,8 +29,9 @@ def main(args):
 	input_tensors, variables, loss, outputs, checks = auto_gan.build_model()
 
 	ag_optim = tf.train.AdamOptimizer(args.learning_rate,
-						 beta1=args.beta1).minimize(loss['autogan_loss'],
-						 var_list=variables['ag_vars'])
+								 beta1=args.beta1).minimize(
+										loss['autogan_loss'],
+										var_list=variables['ag_vars'])
 
 	global_step_tensor = tf.Variable(0, trainable=False, name='global_step')
 	merged = tf.summary.merge_all()

@@ -41,8 +41,16 @@ class AutoGAN:
 		flat_gen_image = tf.contrib.layers.flatten(gen_image)
 
 		print('Building the Loss Function')
-		auto_gan_loss = tf.contrib.losses.mean_squared_error(flat_gen_image,
+		autoencoded_loss = tf.contrib.losses.mean_squared_error(flat_gen_image,
 															labels=flat_image)
+
+		white_pixels_image = tf.count_nonzero(flat_image)/1000
+		white_pixels_gen_image = tf.count_nonzero(flat_gen_image)/1000
+		#white_penalty_loss = tf.to_float(tf.square(white_pixels_image - white_pixels_gen_image))
+		white_penalty_loss = tf.to_float(tf.square(white_pixels_image - white_pixels_gen_image))
+
+		auto_gan_loss = autoencoded_loss + white_penalty_loss
+
 		t_vars = tf.trainable_variables()
 		self.add_tb_histogram_summaries(t_vars)
 		self.add_tb_scalar_summaries(auto_gan_loss)
