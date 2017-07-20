@@ -21,6 +21,9 @@ class AutoGAN:
 	def build_model(self) :
 
 		print('Initializing placeholder')
+		#print('================ {}: Image size: {}'.format(
+		#    'build_model',
+		#    self.options['image_size']))
 		img_size = self.options['image_size']
 		image = tf.placeholder('float32', [self.options['batch_size'],
 		                              img_size, img_size, 3],

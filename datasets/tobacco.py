@@ -35,9 +35,10 @@ class DataSet(object):
     def __init__(self,
                  images,
                  labels,
+                 reshape,
+                 classes,
                  one_hot=False,
                  dtype=dtypes.float32,
-                 reshape=[128, 128],
                  dataset_path='.',
                  seed=None):
 
@@ -60,6 +61,9 @@ class DataSet(object):
         self._index_in_epoch = 0
         self._num_examples = len(labels)
         self.reshape = reshape
+        self.classes = classes
+        self.n_classes = len(classes)
+        self.one_hot = one_hot
 
     def shuffle_data(self):
         # Shuffling inspired by
@@ -115,6 +119,12 @@ class DataSet(object):
             ret_images = self._images[start:end]
             ret_labels = self._labels[start:end]
 
+        if self.one_hot:
+            ret_labels = np.array(ret_labels).astype(np.int)
+            ret_labels = dense_to_one_hot(ret_labels, self.n_classes)
+
+        #print("======== {}: Epoch {}, Batch {}".format(
+        #        'next_batch', self._epochs_completed, self._index_in_epoch))
         return self.load_image_files(ret_images), ret_labels
 
     @property
@@ -135,23 +145,33 @@ class DataSet(object):
             img = img.resize((self.reshape[1], self.reshape[0]), Image.BICUBIC)
             w, h = img.size
             img_black_and_white = img.convert('L')
+            del img
+
             img_black_and_white = np.asarray(img_black_and_white,
                                             dtype = np.uint8)
-            img_black_and_white = np.resize(img_black_and_white[:,:], (w, h, 3))
-            ret.append(img_black_and_white)
+            #img_black_and_white = np.resize(img_black_and_white[:,:], (w, h, 3))
+            img_3_channels = np.zeros(shape=(self.reshape[1], self.reshape[0], 3))
+            img_3_channels[:,:,0] = img_black_and_white
+            img_3_channels[:,:,1] = img_black_and_white
+            img_3_channels[:,:,2] = img_black_and_white
+            ret.append(img_3_channels)
         return ret
 
-    def dense_to_one_hot(self, labels_dense, num_classes):
-        """Convert class labels from scalars to one-hot vectors."""
-        num_labels = labels_dense.shape[0]
-        index_offset = numpy.arange(num_labels) * num_classes
-        labels_one_hot = numpy.zeros((num_labels, num_classes))
-        labels_one_hot.flat[index_offset + labels_dense.ravel()] = 1
-        return labels_one_hot
+def dense_to_one_hot(labels_dense, num_classes):
+    """Convert class labels from scalars to one-hot vectors.
+
+        E.g., if labels_dense is an nparray of shape (10,), and num_classes
+        is 3, then `dense_to_one_hot()` will return a vector of shape (10, 3)
+    """
+    num_labels = labels_dense.shape[0]
+    index_offset = numpy.arange(num_labels) * num_classes
+    labels_one_hot = numpy.zeros((num_labels, num_classes))
+    labels_one_hot.flat[index_offset + labels_dense.ravel()] = 1
+    return labels_one_hot
 
 
 def read_data_sets(one_hot=False,
-                   reshape=[128, 128],
+                   reshape=[128,128],
                    seed=None,
                    dataset_index=0):
     dataset_path = os.path.join('data', 'datasets', 'tobacco')
@@ -160,6 +180,7 @@ def read_data_sets(one_hot=False,
     validation_list = os.path.join(dataset_path,
                 'validate_{}.txt'.format(dataset_index))
     test_list = os.path.join(dataset_path, 'test_{}.txt'.format(dataset_index))
+    classes_list = os.path.join(dataset_path, 'labels.txt')
 
     with open(train_list, 'r') as f:
         train_images, train_labels = parse_data_list(f)
@@ -170,7 +191,11 @@ def read_data_sets(one_hot=False,
     with open(test_list, 'r') as f:
         test_images, test_labels = parse_data_list(f)
 
-    options = dict(reshape=reshape, seed=seed, dataset_path=dataset_path)
+    with open(classes_list, 'r') as f:
+        classes = list(list(parse_data_list(f))[0])
+
+    options = dict(reshape=reshape, seed=seed, dataset_path=dataset_path,
+                    classes=classes, one_hot=one_hot)
 
 
     train = DataSet(train_images, train_labels, **options)
